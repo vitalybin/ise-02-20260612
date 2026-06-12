@@ -20,7 +20,7 @@ class DatenImportService:
         self.import_dir = import_dir
 
     def execute(self, user, filename: str) -> dict:
-        self.berechtigungs_service.execute(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
         filepath = os.path.join(self.import_dir, filename)
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"Importdatei nicht gefunden: {filename}")

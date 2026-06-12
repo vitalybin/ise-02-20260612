@@ -12,7 +12,7 @@ class UserVerwaltenService:
         self.berechtigungs_service = berechtigungs_service
 
     def execute(self, admin_user, aktion: str, **kwargs) -> None:
-        self.berechtigungs_service.execute(admin_user, Berechtigung.USER_VERWALTEN)
+        self.berechtigungs_service.pruefeBerechtigung(admin_user, Berechtigung.USER_VERWALTEN)
         if aktion == "anlegen":
             user = User(
                 username=kwargs["username"],

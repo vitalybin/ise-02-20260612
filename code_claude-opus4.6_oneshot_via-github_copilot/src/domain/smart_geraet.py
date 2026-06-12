@@ -21,9 +21,19 @@ class ISmartGeraet(ABC):
     def kalibrieren(self) -> None:
         pass
 
+    @abstractmethod
+    def installieren(self, raum) -> None:
+        pass
+
+    @abstractmethod
+    def istSteuerbar(self) -> bool:
+        pass
+
 
 class SmartGeraet(ISmartGeraet):
-    """Basisklasse fuer alle Smart-Geraete"""
+    """<<abstract>> Basisklasse fuer alle Smart-Geraete
+    Nicht direkt instanziierbar – nur ueber konkrete Subklassen (SmartLampe, SmartHeizung, etc.).
+    """
 
     def __init__(self, geraetId: int = None, name: str = "",
                  typ: GeraeteTyp = None,
@@ -53,5 +63,4 @@ class SmartGeraet(ISmartGeraet):
     def konfigurieren(self, **kwargs) -> None:
         self.configuration.update(kwargs)
 
-    def kalibrieren(self) -> None:
-        pass
+    # kalibrieren() bleibt abstrakt – SmartGeraet ist nicht direkt instanziierbar

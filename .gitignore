@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# App data directories (backups, exports, imports)
+backups/
+exports/
+imports/

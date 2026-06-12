@@ -1,8 +1,17 @@
+from abc import ABC, abstractmethod
 from domain.smart_geraet import SmartGeraet
 from domain.enums import GeraeteTyp, GeraeteStatus
 
 
-class SmartKamera(SmartGeraet):
+class ISmartKamera(ABC):
+    """<<interface>> ISmartKamera"""
+
+    @abstractmethod
+    def modusAendern(self, modus: str = "normal") -> None:
+        pass
+
+
+class SmartKamera(SmartGeraet, ISmartKamera):
     def __init__(self, geraetId: int = None, name: str = "",
                  status: GeraeteStatus = GeraeteStatus.NICHT_INSTALLIERT,
                  raumId: int = None, configuration: dict = None):
@@ -10,3 +19,6 @@ class SmartKamera(SmartGeraet):
 
     def modusAendern(self, modus: str = "normal") -> None:
         self.configuration["modus"] = modus
+
+    def kalibrieren(self) -> None:
+        self.configuration["kalibriert"] = True

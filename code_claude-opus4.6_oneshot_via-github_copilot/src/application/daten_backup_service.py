@@ -20,7 +20,7 @@ class DatenBackupService:
         self.backup_dir = backup_dir
 
     def execute(self, user) -> str:
-        self.berechtigungs_service.execute(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
         os.makedirs(self.backup_dir, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"backup_{timestamp}.json"
