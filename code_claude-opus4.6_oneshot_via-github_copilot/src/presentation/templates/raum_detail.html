@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ raum.name }} - Smart-Home{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('raum.raeume') }}">Raeume</a></li>
+        <li class="breadcrumb-item active">{{ raum.name }}</li>
+    </ol>
+</nav>
+
+<h2>{{ raum.name }}</h2>
+<p class="text-muted">{{ raum.beschreibung or '' }}</p>
+
+<h4>Installierte Geraete</h4>
+{% if raum.installierteGeraete %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th><th>Name</th><th>Typ</th><th>Status</th><th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for g in raum.installierteGeraete %}
+        <tr>
+            <td>{{ g.geraetId }}</td>
+            <td>{{ g.name }}</td>
+            <td>{{ g.typ.value }}</td>
+            <td><span class="status-{{ g.status.value }}">{{ g.status.value }}</span></td>
+            <td>
+                {% if session.get('rolle') in ['TECHNIKER', 'ADMIN'] and g.istSteuerbar() %}
+                <form method="post" action="{{ url_for('geraete.steuern', geraet_id=g.geraetId) }}" class="d-inline">
+                    {% if g.configuration.get('eingeschaltet') %}
+                    <input type="hidden" name="aktion" value="ausschalten">
+                    <button class="btn btn-warning btn-sm">Ausschalten</button>
+                    {% else %}
+                    <input type="hidden" name="aktion" value="einschalten">
+                    <button class="btn btn-success btn-sm">Einschalten</button>
+                    {% endif %}
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">Keine Geraete in diesem Raum installiert.</div>
+{% endif %}
+
+{% if session.get('rolle') in ['TECHNIKER', 'ADMIN'] %}
+<div class="card mt-3">
+    <div class="card-header">Geraet in diesem Raum installieren</div>
+    <div class="card-body">
+        <form method="post" action="{{ url_for('raum.installieren', raum_id=raum.raumId) }}">
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="number" class="form-control" name="geraet_id" placeholder="Geraet-ID" required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Installieren</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

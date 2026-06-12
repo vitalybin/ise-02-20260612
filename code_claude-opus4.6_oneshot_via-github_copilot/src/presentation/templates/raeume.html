@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Raeume - Smart-Home{% endblock %}
+{% block content %}
+<h2>&#127970; Raeume</h2>
+<div class="row">
+    {% for raum in raeume %}
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ raum.name }}</h5>
+                <p class="card-text text-muted">{{ raum.beschreibung or 'Keine Beschreibung' }}</p>
+                <p>
+                    <span class="badge bg-info">{{ raum.installierteGeraete|length }} Geraete</span>
+                </p>
+                <a href="{{ url_for('raum.raum_detail', raum_id=raum.raumId) }}" class="btn btn-primary btn-sm">
+                    Details anzeigen
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">Keine Raeume vorhanden.</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

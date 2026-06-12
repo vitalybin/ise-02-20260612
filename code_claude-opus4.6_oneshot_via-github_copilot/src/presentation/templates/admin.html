@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Administration - Smart-Home{% endblock %}
+{% block content %}
+<h2>&#9881;&#65039; Administration</h2>
+
+<ul class="nav nav-tabs mb-3" id="adminTab" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-users">Benutzerverwaltung</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-backup">Backup</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-export">Export</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-import">Import</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-jobs">Auftraege</button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- Benutzerverwaltung -->
+    <div class="tab-pane fade show active" id="tab-users">
+        <h4>Benutzer</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr><th>ID</th><th>Username</th><th>Anzeigename</th><th>Rolle</th><th>Aktiv</th><th>Aktionen</th></tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.userId }}</td>
+                    <td>{{ u.username }}</td>
+                    <td>{{ u.anzeigename }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin.user_rolle', user_id=u.userId) }}" class="d-flex gap-1">
+                            <select name="rolle" class="form-select form-select-sm" style="width: auto;">
+                                {% for r in rollen %}
+                                <option value="{{ r }}" {% if u.rolle.value == r %}selected{% endif %}>{{ r }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-sm btn-outline-primary">OK</button>
+                        </form>
+                    </td>
+                    <td>
+                        {% if u.active %}
+                        <span class="badge bg-success">Ja</span>
+                        {% else %}
+                        <span class="badge bg-danger">Nein</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin.user_toggle', user_id=u.userId) }}" class="d-inline">
+                            {% if u.active %}
+                            <input type="hidden" name="aktion" value="deaktivieren">
+                            <button class="btn btn-sm btn-outline-danger">Deaktivieren</button>
+                            {% else %}
+                            <input type="hidden" name="aktion" value="aktivieren">
+                            <button class="btn btn-sm btn-outline-success">Aktivieren</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="card">
+            <div class="card-header">Neuen Benutzer anlegen</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('admin.user_anlegen') }}" class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="password" class="form-control" name="password" placeholder="Passwort" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" name="anzeigename" placeholder="Anzeigename">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="rolle" class="form-select">
+                            {% for r in rollen %}
+                            <option value="{{ r }}">{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary">+</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup -->
+    <div class="tab-pane fade" id="tab-backup">
+        <h4>Datenbackup erstellen</h4>
+        <p>Erstellt ein vollstaendiges JSON-Backup aller Raeume, Geraete und Benutzer.</p>
+        <form method="post" action="{{ url_for('admin.backup') }}">
+            <button type="submit" class="btn btn-primary">Backup erstellen</button>
+        </form>
+    </div>
+
+    <!-- Export -->
+    <div class="tab-pane fade" id="tab-export">
+        <h4>Daten exportieren</h4>
+        <form method="post" action="{{ url_for('admin.export') }}" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Export-Typ</label>
+                <select name="export_typ" class="form-select">
+                    <option value="vollstaendig">Vollstaendiger Systemexport</option>
+                    <option value="raeume">Alle Raeume</option>
+                    <option value="geraete">Alle Geraete</option>
+                    <option value="defekte_geraete">Defekte Geraete</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Format</label>
+                <select name="format" class="form-select">
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Exportieren</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Import -->
+    <div class="tab-pane fade" id="tab-import">
+        <h4>Daten importieren</h4>
+
+        {% if import_files %}
+        <h5>Vorhandene Importdateien</h5>
+        <form method="post" action="{{ url_for('admin.import_data') }}" class="mb-3">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <select name="filename" class="form-select">
+                        {% for f in import_files %}
+                        <option value="{{ f }}">{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">Importieren</button>
+                </div>
+            </div>
+        </form>
+        {% endif %}
+
+        <h5>Datei hochladen</h5>
+        <form method="post" action="{{ url_for('admin.import_data') }}" enctype="multipart/form-data" class="row g-2">
+            <div class="col-md-6">
+                <input type="file" class="form-control" name="file" accept=".json,.csv">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">Hochladen &amp; Importieren</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Auftraege -->
+    <div class="tab-pane fade" id="tab-jobs">
+        <h4>Backup-/Export-/Import-Auftraege</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr><th>ID</th><th>Typ</th><th>Datei</th><th>Erstellt von</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for j in jobs %}
+                <tr>
+                    <td>{{ j.id }}</td>
+                    <td><span class="badge bg-secondary">{{ j.jobType }}</span></td>
+                    <td>
+                        {% if j.filePath %}
+                        <a href="{{ url_for('admin.download', filename=j.filePath.split('/')[-1]) }}">
+                            {{ j.filePath.split('/')[-1] }}
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ j.createdBy }}</td>
+                    <td>
+                        {% if j.status == 'erfolgreich' %}
+                        <span class="badge bg-success">{{ j.status }}</span>
+                        {% elif j.status == 'fehlgeschlagen' %}
+                        <span class="badge bg-danger">{{ j.status }}</span>
+                        {% else %}
+                        <span class="badge bg-warning">{{ j.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-muted">Keine Auftraege vorhanden.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

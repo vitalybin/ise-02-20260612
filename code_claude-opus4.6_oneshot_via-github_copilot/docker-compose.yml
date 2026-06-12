@@ -1,0 +1,48 @@
+services:
+  smart-home-app:
+    build: .
+    container_name: smart-home-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # project-volume: Quellcode fuer Entwicklungszwecke
+      - ./src:/app/src
+      # app-exchange-volume: Backup, Export, Import
+      - ./backups:/app/backups
+      - ./exports:/app/exports
+      - ./imports:/app/imports
+    environment:
+      - DATABASE_HOST=smart-home-db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=smarthome
+      - DATABASE_USER=smarthome
+      - DATABASE_PASSWORD=smarthome
+      - FLASK_SECRET_KEY=smart-home-secret-key-2026
+    depends_on:
+      smart-home-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  smart-home-db:
+    image: postgres:16
+    container_name: smart-home-db
+    ports:
+      - "5431:5432"
+    volumes:
+      # smart-home-db-volume: Persistente DB-Daten
+      - smart-home-db-volume:/var/lib/postgresql/data
+      # Init-Script
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=smarthome
+      - POSTGRES_USER=smarthome
+      - POSTGRES_PASSWORD=smarthome
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smarthome"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  smart-home-db-volume:

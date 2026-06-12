@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Login - Smart-Home{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card mt-5">
+            <div class="card-header bg-dark text-white text-center">
+                <h4>&#128274; Anmeldung</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Benutzername</label>
+                        <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Passwort</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+                </form>
+            </div>
+            <div class="card-footer text-muted text-center">
+                <small>Standard-Zugaenge: admin/admin, techniker/techniker, viewer/viewer</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

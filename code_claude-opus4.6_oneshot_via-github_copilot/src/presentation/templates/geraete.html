@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Geraete - Smart-Home{% endblock %}
+{% block content %}
+<h2>&#128268; Geraete</h2>
+
+<!-- Statusfilter -->
+<div class="mb-3">
+    <form method="get" class="d-flex gap-2">
+        <select name="status" class="form-select" style="max-width: 250px;">
+            <option value="">Alle Status</option>
+            {% for s in alle_status %}
+            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-outline-primary">Filtern</button>
+        {% if status_filter %}
+        <a href="{{ url_for('geraete.geraete') }}" class="btn btn-outline-secondary">Zuruecksetzen</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Geraet anlegen -->
+{% if session.get('rolle') in ['TECHNIKER', 'ADMIN'] %}
+<div class="card mb-3">
+    <div class="card-header">Neues Geraet anlegen</div>
+    <div class="card-body">
+        <form method="post" action="{{ url_for('geraete.geraet_anlegen') }}" class="row g-2">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="name" placeholder="Geraetename" required>
+            </div>
+            <div class="col-md-3">
+                <select name="typ" class="form-select" required>
+                    {% for t in alle_typen %}
+                    <option value="{{ t }}">{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Anlegen</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Geraeteliste -->
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th><th>Name</th><th>Typ</th><th>Status</th><th>Raum-ID</th><th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for g in geraete %}
+        <tr>
+            <td>{{ g.geraetId }}</td>
+            <td>{{ g.name }}</td>
+            <td><span class="badge bg-secondary">{{ g.typ.value }}</span></td>
+            <td><span class="status-{{ g.status.value }} fw-bold">{{ g.status.value }}</span></td>
+            <td>{{ g.raumId or '-' }}</td>
+            <td>
+                {% if session.get('rolle') in ['TECHNIKER', 'ADMIN'] and g.istSteuerbar() %}
+                <!-- Steuern -->
+                <form method="post" action="{{ url_for('geraete.steuern', geraet_id=g.geraetId) }}" class="d-inline">
+                    {% if g.configuration.get('eingeschaltet') %}
+                    <input type="hidden" name="aktion" value="ausschalten">
+                    <button class="btn btn-warning btn-sm">Aus</button>
+                    {% else %}
+                    <input type="hidden" name="aktion" value="einschalten">
+                    <button class="btn btn-success btn-sm">Ein</button>
+                    {% endif %}
+                </form>
+                <!-- Konfigurieren -->
+                <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#konfig-{{ g.geraetId }}">
+                    Konfig
+                </button>
+                <!-- Kalibrieren (Sensor) -->
+                {% if g.typ.value == 'SENSOR' %}
+                <form method="post" action="{{ url_for('geraete.kalibrieren', geraet_id=g.geraetId) }}" class="d-inline">
+                    <button class="btn btn-outline-primary btn-sm">Kalibrieren</button>
+                </form>
+                {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+
+        {% if session.get('rolle') in ['TECHNIKER', 'ADMIN'] and g.istSteuerbar() %}
+        <!-- Konfigurationsmodal -->
+        <div class="modal fade" id="konfig-{{ g.geraetId }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{{ url_for('geraete.konfigurieren', geraet_id=g.geraetId) }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ g.name }} konfigurieren</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% if g.typ.value == 'LAMPE' %}
+                            <div class="mb-3">
+                                <label class="form-label">Helligkeit (0-100)</label>
+                                <input type="number" class="form-control" name="helligkeit" min="0" max="100"
+                                    value="{{ g.configuration.get('helligkeit', 100) }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Farbe</label>
+                                <select name="farbe" class="form-select">
+                                    {% for f in ['weiss', 'warmweiss', 'rot', 'gruen', 'blau', 'gelb'] %}
+                                    <option value="{{ f }}" {% if g.configuration.get('farbe') == f %}selected{% endif %}>{{ f }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% elif g.typ.value == 'HEIZUNG' %}
+                            <div class="mb-3">
+                                <label class="form-label">Zieltemperatur (5-30 &deg;C)</label>
+                                <input type="number" class="form-control" name="zieltemperatur"
+                                    min="5" max="30" step="0.5"
+                                    value="{{ g.configuration.get('zieltemperatur', 21) }}">
+                            </div>
+                            {% elif g.typ.value == 'KAMERA' %}
+                            <div class="mb-3">
+                                <label class="form-label">Modus</label>
+                                <select name="modus" class="form-select">
+                                    {% for m in ['normal', 'nacht', 'bewegung'] %}
+                                    <option value="{{ m }}" {% if g.configuration.get('modus') == m %}selected{% endif %}>{{ m }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">Keine speziellen Konfigurationsoptionen.</p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                            <button type="submit" class="btn btn-primary">Speichern</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

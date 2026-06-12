@@ -1,0 +1,11 @@
+{
+    "raeume": [
+        {"name": "Garage", "beschreibung": "Stellplatz mit Werkbank"},
+        {"name": "Terrasse", "beschreibung": "Aussenbereich"}
+    ],
+    "geraete": [
+        {"name": "Garagenlampe", "typ": "LAMPE", "status": "NICHT_INSTALLIERT", "configuration": {"helligkeit": 100, "farbe": "weiss"}},
+        {"name": "Aussensensor", "typ": "SENSOR", "status": "NICHT_INSTALLIERT", "configuration": {"messwert": 0, "einheit": "°C"}},
+        {"name": "Terrassensteckdose", "typ": "STECKDOSE", "status": "NICHT_INSTALLIERT", "configuration": {"stromverbrauch": 0}}
+    ]
+}
