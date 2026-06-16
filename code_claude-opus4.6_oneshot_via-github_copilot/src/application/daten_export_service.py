@@ -23,7 +23,7 @@ class DatenExportService:
 
     def execute(self, user, export_typ: str = "vollstaendig",
                 format: str = "json") -> str:
-        self.berechtigungs_service.execute(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.DATEN_BACKUP_EXPORT_IMPORT)
 
         raeume = self.raum_repo.findAll()
         geraete = self.geraet_repo.findAll()

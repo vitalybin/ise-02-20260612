@@ -11,7 +11,7 @@ class RaumAnzeigenService:
         self.berechtigungs_service = berechtigungs_service
 
     def execute(self, user, raumId=None):
-        self.berechtigungs_service.execute(user, Berechtigung.RAUM_LESEN)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.RAUM_LESEN)
         if raumId:
             raum = self.raum_repo.findById(raumId)
             if raum:

@@ -13,7 +13,7 @@ class GeraetKalibrierenService:
         self.berechtigungs_service = berechtigungs_service
 
     def execute(self, user, geraetId: int) -> None:
-        self.berechtigungs_service.execute(user, Berechtigung.GERAET_STEUERN)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.GERAET_STEUERN)
         geraet = self.geraet_repo.findById(geraetId)
         if not geraet:
             raise ValueError("Geraet nicht gefunden")

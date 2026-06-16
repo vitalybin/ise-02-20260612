@@ -10,7 +10,7 @@ class GeraetAnzeigenService:
         self.berechtigungs_service = berechtigungs_service
 
     def execute(self, user, status_filter=None, geraetId=None):
-        self.berechtigungs_service.execute(user, Berechtigung.GERAET_LESEN)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.GERAET_LESEN)
         if geraetId:
             return self.geraet_repo.findById(geraetId)
         if status_filter:

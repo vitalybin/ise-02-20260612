@@ -1,8 +1,21 @@
+from abc import ABC, abstractmethod
 from domain.smart_geraet import SmartGeraet
 from domain.enums import GeraeteTyp, GeraeteStatus
 
 
-class SmartLampe(SmartGeraet):
+class ISmartLampe(ABC):
+    """<<interface>> ISmartLampe"""
+
+    @abstractmethod
+    def helligkeitAendern(self, helligkeit: int = 100) -> None:
+        pass
+
+    @abstractmethod
+    def farbeAendern(self, farbe: str = "weiss") -> None:
+        pass
+
+
+class SmartLampe(SmartGeraet, ISmartLampe):
     def __init__(self, geraetId: int = None, name: str = "",
                  status: GeraeteStatus = GeraeteStatus.NICHT_INSTALLIERT,
                  raumId: int = None, configuration: dict = None):
@@ -13,3 +26,6 @@ class SmartLampe(SmartGeraet):
 
     def farbeAendern(self, farbe: str = "weiss") -> None:
         self.configuration["farbe"] = farbe
+
+    def kalibrieren(self) -> None:
+        self.configuration["kalibriert"] = True

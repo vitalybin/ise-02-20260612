@@ -14,7 +14,7 @@ class GeraetInstallierenService:
         self.berechtigungs_service = berechtigungs_service
 
     def execute(self, user, geraetId: int, raumId: int) -> None:
-        self.berechtigungs_service.execute(user, Berechtigung.GERAET_INSTALLIEREN)
+        self.berechtigungs_service.pruefeBerechtigung(user, Berechtigung.GERAET_INSTALLIEREN)
         geraet = self.geraet_repo.findById(geraetId)
         raum = self.raum_repo.findById(raumId)
         if not geraet:
